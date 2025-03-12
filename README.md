@@ -1,4 +1,4 @@
-# CrackedClient-1.20.4--v1.0-Old
+# CrackedClient-1.20.4-v1.0-Old
 Cracked-Client v1.0-Old
 
 This client isn't the original; it's a tested client. Be careful, it's not the original; it has errors and bugs. We're not going to fix it anymore; you'll have to do it yourself.
