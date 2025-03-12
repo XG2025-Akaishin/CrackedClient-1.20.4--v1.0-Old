@@ -1,0 +1,57 @@
+package me.alpha432.oyvey.features.modules.client;
+
+import me.alpha432.oyvey.features.modules.Module;
+import me.alpha432.oyvey.features.settings.Setting;
+import net.minecraft.util.math.MathHelper;
+
+import java.awt.*;
+
+/**
+Future Colors Central
+ */
+public final class Colors extends Module {
+    private static Colors INSTANCE = new Colors();
+    public Setting<Float> hue = this.register(new Setting<>("Hue", 2f, 0f, 4f));
+    public Setting<Float> saturation = this.register(new Setting<>("Saturation", 2f, 0f, 4f));
+    public Setting<Float> lightness = this.register(new Setting<>("Lightness", 2f, 0f, 4f));
+    public Setting<Boolean> hudRainbow = this.register(new Setting<>("HUDRainbow", false));
+    public Setting<Float> rainbowSpeed = this.register(new Setting<>("RainbowSpeed", 2f, 0f, 4f));
+    public Setting<Float> rainbowHue = this.register(new Setting<>("RainbowHue", 2f, 0f, 4f));
+
+
+    public Colors(){
+        super("Colors", "Colors settings", Category.CLIENT, true, false, false);
+        this.setInstance();
+    }
+
+    public static Colors getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new Colors();
+        }
+        return INSTANCE;
+    }
+
+    private void setInstance() {
+        INSTANCE = this;
+    }
+
+    public int getClientColorCustomAlpha(int alpha){
+        Color color = setAlpha(new Color(Color.HSBtoRGB(hue.getValue(), saturation.getValue() / 100f, lightness.getValue() / 100f)), alpha);
+        return color.getRGB();
+    }
+
+    public static final Color setAlpha(Color color, int alpha) {
+        alpha = MathHelper.clamp(alpha, 0, 255);
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+    }
+
+    public static Color getRainbow(int speed, int offset, float s, float brightness) {
+        float hue = (System.currentTimeMillis() + offset) % speed;
+        hue /= speed;
+        return Color.getHSBColor(hue, s, brightness);
+    }
+
+    public int getClientColor(){
+        return Color.getHSBColor(hue.getValue(), saturation.getValue() / 100f, lightness.getValue() / 100f).getRGB();
+    }
+}

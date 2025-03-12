@@ -1,0 +1,59 @@
+package me.alpha432.oyvey.mixin.norender;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.awt.*;
+import me.alpha432.oyvey.util.futurepro.RenderUtils;
+import me.alpha432.oyvey.util.MathUtil;
+import me.alpha432.oyvey.features.modules.render.norender.NoRender;
+import static me.alpha432.oyvey.util.traits.Util.mc;
+
+@Mixin(LivingEntityRenderer.class)
+public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
+    @Unique
+    private LivingEntity lastEntity;
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void onRenderHead(T entity, float f, float g, MatrixStack matrices, VertexConsumerProvider vertexConsumerProvider, CallbackInfo ci) {
+        lastEntity = entity;
+    }
+
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
+    private void onRenderModel(EntityModel entityModel, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+        Color newColor = new Color(red, green, blue, alpha);
+        if (NoRender.getInstance().isOn() && NoRender.getInstance().antiPlayerCollision.getValue() && lastEntity!= mc.player) {
+            float overrideAlpha = (float) (mc.player.squaredDistanceTo(lastEntity.getPos()) / 3f) + 0.2f;
+            newColor = RenderUtils.injectAlpha(newColor, (int) (255f * MathUtil.clamp(overrideAlpha, 0f, 1f)));
+        }
+        entityModel.render(matrices, vertices, light, overlay, newColor.getRed() / 255F, newColor.getGreen() / 255F, newColor.getBlue() / 255F, newColor.getAlpha() / 255F);
+    }
+}
+/*
+@Mixin(LivingEntityRenderer.class)
+public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> {
+    @Unique
+    private LivingEntity lastEntity;
+
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
+    private void onRenderModel(EntityModel entityModel, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+        Color newColor = new Color(red, green, blue, alpha);
+        if (NoRender.getInstance().isOn() && NoRender.getInstance().antiPlayerCollision.getValue() && lastEntity != mc.player) {
+            float overrideAlpha = (float) (mc.player.squaredDistanceTo(lastEntity.getPos()) / 3f) + 0.2f;
+            newColor = RenderUtils.injectAlpha(newColor, (int) (255f * MathUtil.clamp(overrideAlpha, 0f, 1f)));
+        }
+        entityModel.render(matrices, vertices, light, overlay, newColor.getRed() / 255F, newColor.getGreen() / 255F, newColor.getBlue() / 255F, newColor.getAlpha() / 255F);
+    }
+}
+*/
