@@ -8,3 +8,5 @@ By the way, it has the GEAR.png and ARROW.png files from FutureClient.
 
 We're currently on Cracked Future v2.4. For more information, visit Discord:
 https://discord.gg/rPHn7ArTxH
+
+![image](https://github.com/user-attachments/assets/b2131e91-d9e2-4c56-9fa5-1d1e2f38b5f3)
